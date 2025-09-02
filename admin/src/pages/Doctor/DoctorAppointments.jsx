@@ -225,12 +225,26 @@ const MedicalForm = ({ appointment, onSave, profileData, onShowHistory }) => {
 
   const resetForm = () => {
     if (window.confirm('Reset the form? All data will be lost.')) {
+      const getPatientAge = () => {
+        if (appointment.userData.dob && appointment.userData.dob !== 'Not Selected') {
+          return calculateAge(appointment.userData.dob).toString();
+        }
+        return '';
+      };
+
+      const getPatientAddress = () => {
+        if (appointment.userData.address && appointment.userData.address.line1) {
+          return `${appointment.userData.address.line1}${appointment.userData.address.line2 ? ', ' + appointment.userData.address.line2 : ''}`;
+        }
+        return '';
+      };
+
       setFormData({
         patientName: appointment.userData.name,
         patientContact: appointment.userData.phone,
-        patientAge: calculateAge(appointment.userData.dob),
+        patientAge: getPatientAge(),
         patientGender: appointment.userData.gender,
-        patientAddress: appointment.userData.address,
+        patientAddress: getPatientAddress(),
         chiefComplaint: '',
         clinicalNotes: '',
         bloodPressure: '',
