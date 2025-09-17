@@ -15,6 +15,7 @@ import DoctorAppointments from './pages/Doctor/DoctorAppointments';
 import DoctorDashboard from './pages/Doctor/DoctorDashboard';
 import DoctorProfile from './pages/Doctor/DoctorProfile';
 import CompleteAppointment from './pages/Doctor/CompleteAppointment';
+import PatientRecords from './pages/Doctor/PatientRecords';
 
 const App = () => {
 
