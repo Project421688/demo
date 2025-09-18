@@ -8,6 +8,7 @@ const PatientRecords = () => {
   const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [selectedPatientName, setSelectedPatientName] = useState('');
   const [viewingHistoryForm, setViewingHistoryForm] = useState(null);
+  const [showAllDoctors, setShowAllDoctors] = useState(true); // Show all doctors' data by default in Patient Records
 
   const handleSelectPatient = (patientId, patientName) => {
     setSelectedPatientId(patientId);
@@ -39,7 +40,7 @@ const PatientRecords = () => {
           <h1 className="text-lg font-medium mb-4">Patient Medical Records</h1>
           <PatientSearch 
             onSelectPatient={handleSelectPatient} 
-            onBack={() => {}} // No back needed from main view
+            showBackButton={false} // Don't show back button in Patient Records
           />
         </div>
       )}
@@ -50,6 +51,7 @@ const PatientRecords = () => {
           patientName={selectedPatientName}
           onBack={handleBackToSearch}
           onSelectForm={handleSelectForm}
+          showAllDoctors={showAllDoctors}
         />
       )}
       
