@@ -475,6 +475,7 @@ const DoctorAppointments = () => {
   const [selectedPatientName, setSelectedPatientName] = useState('');
   const [viewingHistoryForm, setViewingHistoryForm] = useState(null);
   const [showPatientSearch, setShowPatientSearch] = useState(false);
+  const [navigationSource, setNavigationSource] = useState(''); // Track where navigation came from
   const { dToken, appointments, getAppointments, cancelAppointment, completeAppointment, profileData, getProfileData } = useContext(DoctorContext);
   const { slotDateFormat, calculateAge, currency } = useContext(AppContext);
 
@@ -503,6 +504,7 @@ const DoctorAppointments = () => {
     
     setSelectedPatientId(patientId);
     setSelectedPatientName(patientName);
+    setNavigationSource('history');
     setShowHistory(true);
   };
 
@@ -510,6 +512,7 @@ const DoctorAppointments = () => {
     setSelectedPatientId(patientId);
     setSelectedPatientName(patientName);
     setShowPatientSearch(false);
+    setNavigationSource('allPatients');
     setShowHistory(true);
   };
 
@@ -517,17 +520,29 @@ const DoctorAppointments = () => {
     setSelectedAppointment(null);
     setShowHistory(false);
     setViewingHistoryForm(null);
+    setNavigationSource('allPatients');
     setShowPatientSearch(true);
   };
+
   const handleBackFromHistory = () => {
-    setShowHistory(false);
-    setSelectedPatientId(null);
-    setSelectedPatientName('');
-    setViewingHistoryForm(null);
+    if (navigationSource === 'allPatients') {
+      // Go back to patient search
+      setShowHistory(false);
+      setShowPatientSearch(true);
+      setViewingHistoryForm(null);
+    } else {
+      // Go back to eForm (history button case)
+      setShowHistory(false);
+      setSelectedPatientId(null);
+      setSelectedPatientName('');
+      setViewingHistoryForm(null);
+    }
   };
 
   const handleBackFromPatientSearch = () => {
+    // Always go back to eForm when coming from All Patients button
     setShowPatientSearch(false);
+    setNavigationSource('');
   };
 
   const handleSelectHistoryForm = (appointment) => {
@@ -535,12 +550,16 @@ const DoctorAppointments = () => {
   };
 
   const handleBackFromViewer = () => {
-    setViewingHistoryForm(null);
+    if (navigationSource === 'allPatients') {
+      setViewingHistoryForm(null);
+    } else {
+      // For history button, go back to history view
+      setViewingHistoryForm(null);
+    }
   };
 
   return (
     <div className='w-full max-w-6xl m-5'>
-      <p className='text-lg font-medium mb-3'>All Appointments</p>
       {viewingHistoryForm ? (
         <EFormViewer appointment={viewingHistoryForm} onBack={handleBackFromViewer} />
       ) : showPatientSearch ? (
@@ -555,7 +574,7 @@ const DoctorAppointments = () => {
           patientName={selectedPatientName}
           onBack={handleBackFromHistory} 
           onSelectForm={handleSelectHistoryForm}
-          showAllDoctors={false}
+          showAllDoctors={navigationSource === 'allPatients'}
         />
       ) : selectedAppointment && profileData ? (
         <MedicalForm 
@@ -566,6 +585,8 @@ const DoctorAppointments = () => {
           onShowAllPatients={handleShowAllPatients}
         />
       ) : (
+        <>
+        <p className='text-lg font-medium mb-3'>All Appointments</p>
         <div className='bg-white border rounded text-sm max-h-[80vh] overflow-y-scroll'>
           <div className='max-sm:hidden grid grid-cols-[0.5fr_2fr_1fr_1fr_3fr_1fr_1fr] gap-1 py-3 px-6 border-b'>
             <p>#</p>
@@ -602,6 +623,7 @@ const DoctorAppointments = () => {
             </div>
           ))}
         </div>
+        </>
       )}
     </div>
   );

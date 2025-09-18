@@ -8,7 +8,6 @@ const PatientRecords = () => {
   const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [selectedPatientName, setSelectedPatientName] = useState('');
   const [viewingHistoryForm, setViewingHistoryForm] = useState(null);
-  const [showAllDoctors, setShowAllDoctors] = useState(true); // Show all doctors' data by default in Patient Records
 
   const handleSelectPatient = (patientId, patientName) => {
     setSelectedPatientId(patientId);
@@ -51,7 +50,7 @@ const PatientRecords = () => {
           patientName={selectedPatientName}
           onBack={handleBackToSearch}
           onSelectForm={handleSelectForm}
-          showAllDoctors={showAllDoctors}
+          showAllDoctors={true}
         />
       )}
       
