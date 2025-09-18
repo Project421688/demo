@@ -3,10 +3,10 @@ import { DoctorContext } from '../context/DoctorContext';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 
-const EFormHistory = ({ patientId, patientName, onBack, onSelectForm }) => {
+const EFormHistory = ({ patientId, patientName, onBack, onSelectForm, showAllDoctors = false }) => {
   const [patientHistory, setPatientHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { dToken } = useContext(DoctorContext);
+  const { dToken, profileData } = useContext(DoctorContext);
   const { backendUrl, slotDateFormat } = useContext(AppContext);
 
   useEffect(() => {
@@ -20,7 +20,16 @@ const EFormHistory = ({ patientId, patientName, onBack, onSelectForm }) => {
         { headers: { dToken } }
       );
       if (data.success) {
-        setPatientHistory(data.appointments);
+        let appointments = data.appointments;
+        
+        // If showAllDoctors is false, filter to show only current doctor's appointments
+        if (!showAllDoctors && profileData) {
+          appointments = appointments.filter(appointment => 
+            appointment.docData._id === profileData._id
+          );
+        }
+        
+        setPatientHistory(appointments);
       }
     } catch (error) {
       console.error('Error fetching patient history:', error);

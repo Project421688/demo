@@ -3,7 +3,7 @@ import { DoctorContext } from '../context/DoctorContext';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 
-const PatientSearch = ({ onSelectPatient, onBack }) => {
+const PatientSearch = ({ onSelectPatient, onBack, showBackButton = true }) => {
   const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -47,12 +47,14 @@ const PatientSearch = ({ onSelectPatient, onBack }) => {
   return (
     <div className="w-full max-w-4xl m-5">
       <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 px-4 py-2 border rounded hover:bg-gray-100 transition-all"
-        >
-          ← Back
-        </button>
+        {showBackButton && (
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2 border rounded hover:bg-gray-100 transition-all"
+          >
+            ← Back
+          </button>
+        )}
         <h2 className="text-xl font-medium">Select Patient</h2>
       </div>
 

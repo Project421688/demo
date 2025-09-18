@@ -540,21 +540,14 @@ const DoctorAppointments = () => {
 
   return (
     <div className='w-full max-w-6xl m-5'>
-      <div className="flex items-center justify-between mb-3">
-        <p className='text-lg font-medium'>All Appointments</p>
-        <button
-          onClick={() => setShowPatientSearch(true)}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-all"
-        >
-          View Patient History
-        </button>
-      </div>
+      <p className='text-lg font-medium mb-3'>All Appointments</p>
       {viewingHistoryForm ? (
         <EFormViewer appointment={viewingHistoryForm} onBack={handleBackFromViewer} />
       ) : showPatientSearch ? (
         <PatientSearch 
           onSelectPatient={handleSelectPatientFromSearch} 
           onBack={handleBackFromPatientSearch} 
+          showBackButton={true}
         />
       ) : showHistory ? (
         <EFormHistory 
@@ -562,6 +555,7 @@ const DoctorAppointments = () => {
           patientName={selectedPatientName}
           onBack={handleBackFromHistory} 
           onSelectForm={handleSelectHistoryForm}
+          showAllDoctors={false}
         />
       ) : selectedAppointment && profileData ? (
         <MedicalForm 
