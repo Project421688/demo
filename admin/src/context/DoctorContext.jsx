@@ -32,21 +32,22 @@ const DoctorContextProvider = (props) => {
             toast.error(error.message)
         }
     }
+    
     const completeAppointment = async (appointmentId, formData) => {
-  try {
-    const response = await axios.post(`${backendUrl}/api/doctor/save-eform/${appointmentId}`, { formData }, {
-      headers: { dToken }
-    });
-    if (response.data.success) {
-      toast.success(response.data.message);
-      getAppointments();
-    } else {
-      toast.error(response.data.message);
-    }
-  } catch (error) {
-    toast.error("Failed to save form");
-  }
-};
+        try {
+            const response = await axios.post(`${backendUrl}/api/doctor/save-eform/${appointmentId}`, { formData }, {
+                headers: { dToken }
+            });
+            if (response.data.success) {
+                toast.success(response.data.message);
+                getAppointments();
+            } else {
+                toast.error(response.data.message);
+            }
+        } catch (error) {
+            toast.error("Failed to save form");
+        }
+    };
 
     // Getting Doctor profile data from Database using API
     const getProfileData = async () => {
@@ -83,8 +84,6 @@ const DoctorContextProvider = (props) => {
         }
 
     }
-
- 
 
     // Getting all patients data from Database using API
     const getAllPatients = async () => {
@@ -138,7 +137,6 @@ const DoctorContextProvider = (props) => {
             {props.children}
         </DoctorContext.Provider>
     )
-
 
 }
 
