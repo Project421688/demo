@@ -6,6 +6,50 @@ import validator from "validator";
 import { v2 as cloudinary } from "cloudinary";
 import userModel from "../models/userModel.js";
 
+// API to get filtered and paginated appointments for admin dashboard
+const getFilteredAppointments = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+        const doctorName = req.query.doctor || '';
+
+        // Filter for present day and future appointments
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const query = {
+            date: { $gte: today.getTime() }
+        };
+
+        // Add doctor filter if provided
+        if (doctorName) {
+            query['docData.name'] = new RegExp(doctorName, 'i');
+        }
+
+        const appointments = await appointmentModel.find(query)
+            .sort({ date: 1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalAppointments = await appointmentModel.countDocuments(query);
+
+        res.json({
+            success: true,
+            appointments: appointments,
+            pagination: {
+                total: totalAppointments,
+                totalPages: Math.ceil(totalAppointments / limit),
+                currentPage: page
+            }
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
 // API for admin login
 const loginAdmin = async (req, res) => {
     try {
@@ -154,5 +198,6 @@ export {
     appointmentCancel,
     addDoctor,
     allDoctors,
-    adminDashboard
+    adminDashboard,
+    getFilteredAppointments
 }
