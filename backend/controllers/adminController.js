@@ -6,6 +6,183 @@ import validator from "validator";
 import { v2 as cloudinary } from "cloudinary";
 import userModel from "../models/userModel.js";
 
+// API to get latest bookings with date filter and pagination for dashboard
+const getLatestBookings = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+        const selectedDate = req.query.date;
+
+        let query = {};
+        
+        if (selectedDate) {
+            // Filter for specific date
+            const startOfDay = new Date(selectedDate);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(selectedDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            
+            query.date = {
+                $gte: startOfDay.getTime(),
+                $lte: endOfDay.getTime()
+            };
+        } else {
+            // Filter for present day and future dates
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            query.date = { $gte: today.getTime() };
+        }
+
+        const appointments = await appointmentModel.find(query)
+            .sort({ date: 1, slotTime: 1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalAppointments = await appointmentModel.countDocuments(query);
+
+        res.json({
+            success: true,
+            appointments: appointments,
+            pagination: {
+                total: totalAppointments,
+                totalPages: Math.ceil(totalAppointments / limit),
+                currentPage: page
+            }
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// API to get filtered appointments for All Appointments page
+const getFilteredAppointmentsForPage = async (req, res) => {
+    try {
+        const { filterType, doctorName, fromDate, toDate, page = 1 } = req.query;
+        const limit = 20;
+        const skip = (page - 1) * limit;
+
+        let query = {};
+
+        if (filterType === 'date') {
+            if (fromDate && toDate) {
+                const startDate = new Date(fromDate);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(toDate);
+                endDate.setHours(23, 59, 59, 999);
+                
+                query.date = {
+                    $gte: startDate.getTime(),
+                    $lte: endDate.getTime()
+                };
+            } else if (fromDate) {
+                const startDate = new Date(fromDate);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(fromDate);
+                endDate.setHours(23, 59, 59, 999);
+                
+                query.date = {
+                    $gte: startDate.getTime(),
+                    $lte: endDate.getTime()
+                };
+            }
+        } else if (filterType === 'doctor') {
+            if (doctorName) {
+                query['docData.name'] = new RegExp(doctorName, 'i');
+            }
+            
+            if (fromDate && toDate) {
+                const startDate = new Date(fromDate);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(toDate);
+                endDate.setHours(23, 59, 59, 999);
+                
+                query.date = {
+                    $gte: startDate.getTime(),
+                    $lte: endDate.getTime()
+                };
+            } else if (fromDate) {
+                const startDate = new Date(fromDate);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(fromDate);
+                endDate.setHours(23, 59, 59, 999);
+                
+                query.date = {
+                    $gte: startDate.getTime(),
+                    $lte: endDate.getTime()
+                };
+            }
+        }
+
+        const appointments = await appointmentModel.find(query)
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalAppointments = await appointmentModel.countDocuments(query);
+
+        res.json({
+            success: true,
+            appointments: appointments,
+            pagination: {
+                total: totalAppointments,
+                totalPages: Math.ceil(totalAppointments / limit),
+                currentPage: parseInt(page)
+            }
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// API to get filtered and paginated appointments for admin dashboard
+const getFilteredAppointments = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+        const doctorName = req.query.doctor || '';
+
+        // Filter for present day and future appointments
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const query = {
+            date: { $gte: today.getTime() }
+        };
+
+        // Add doctor filter if provided
+        if (doctorName) {
+            query['docData.name'] = new RegExp(doctorName, 'i');
+        }
+
+        const appointments = await appointmentModel.find(query)
+            .sort({ date: 1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalAppointments = await appointmentModel.countDocuments(query);
+
+        res.json({
+            success: true,
+            appointments: appointments,
+            pagination: {
+                total: totalAppointments,
+                totalPages: Math.ceil(totalAppointments / limit),
+                currentPage: page
+            }
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
 // API for admin login
 const loginAdmin = async (req, res) => {
     try {
@@ -154,5 +331,8 @@ export {
     appointmentCancel,
     addDoctor,
     allDoctors,
-    adminDashboard
+    adminDashboard,
+    getFilteredAppointments,
+    getLatestBookings,
+    getFilteredAppointmentsForPage
 }
