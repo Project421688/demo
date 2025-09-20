@@ -14,9 +14,6 @@ const AdminContextProvider = (props) => {
     const [appointments, setAppointments] = useState([])
     const [doctors, setDoctors] = useState([])
     const [dashData, setDashData] = useState(false)
-    
-    // Add backendUrl to context
-    const backendUrl = import.meta.env.VITE_BACKEND_URL
 
     // Getting all Doctors data from Database using API
     const getAllDoctors = async () => {

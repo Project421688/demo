@@ -6,34 +6,34 @@ import axios from 'axios'
 
 const Dashboard = () => {
 
-  const { aToken, getDashData, cancelAppointment, dashData, doctors, getAllDoctors, backendUrl } = useContext(AdminContext)
+  const { aToken, getDashData, cancelAppointment, dashData, backendUrl } = useContext(AdminContext)
   const { slotDateFormat } = useContext(AppContext)
 
-  // State for filtered appointments
-  const [filteredAppointments, setFilteredAppointments] = useState([])
+  // State for latest bookings
+  const [latestBookings, setLatestBookings] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [selectedDoctor, setSelectedDoctor] = useState('')
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(false)
 
-  // Fetch filtered appointments
-  const fetchFilteredAppointments = async () => {
+  // Fetch latest bookings
+  const fetchLatestBookings = async () => {
     try {
       setLoading(true)
-      const { data } = await axios.get(backendUrl + '/api/admin/filtered-appointments', {
+      const { data } = await axios.get(backendUrl + '/api/admin/latest-bookings', {
         headers: { aToken },
         params: {
           page: currentPage,
-          doctor: selectedDoctor
+          date: selectedDate
         }
       })
       
       if (data.success) {
-        setFilteredAppointments(data.appointments)
+        setLatestBookings(data.appointments)
         setTotalPages(data.pagination.totalPages)
       }
     } catch (error) {
-      console.error('Error fetching filtered appointments:', error)
+      console.error('Error fetching latest bookings:', error)
     } finally {
       setLoading(false)
     }
@@ -42,18 +42,17 @@ const Dashboard = () => {
   useEffect(() => {
     if (aToken) {
       getDashData()
-      getAllDoctors()
     }
   }, [aToken])
 
   useEffect(() => {
     if (aToken) {
-      fetchFilteredAppointments()
+      fetchLatestBookings()
     }
-  }, [aToken, currentPage, selectedDoctor])
+  }, [aToken, currentPage, selectedDate])
 
-  const handleDoctorChange = (e) => {
-    setSelectedDoctor(e.target.value)
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value)
     setCurrentPage(1) // Reset to first page when filter changes
   }
 
@@ -93,29 +92,34 @@ const Dashboard = () => {
       <div className='bg-white mt-10'>
         <div className='flex items-center gap-2.5 px-4 py-4 mt-10 rounded-t border'>
           <img src={assets.list_icon} alt="" />
-          <p className='font-semibold'>Latest Bookings (Today & Future)</p>
+          <p className='font-semibold'>Latest Bookings</p>
         </div>
 
-        {/* Filter Controls */}
+        {/* Date Filter Controls */}
         <div className='px-4 py-3 border-b bg-gray-50'>
           <div className='flex items-center gap-4'>
-            <label className='text-sm font-medium text-gray-700'>Filter by Doctor:</label>
-            <select
-              value={selectedDoctor}
-              onChange={handleDoctorChange}
+            <label className='text-sm font-medium text-gray-700'>Select Date:</label>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
               className='px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary'
+            />
+            <button
+              onClick={() => {
+                setSelectedDate(new Date().toISOString().split('T')[0])
+                setCurrentPage(1)
+              }}
+              className='px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary/90'
             >
-              <option value="">All Doctors</option>
-              {doctors.map(doctor => (
-                <option key={doctor._id} value={doctor.name}>{doctor.name}</option>
-              ))}
-            </select>
+              Today
+            </button>
             {loading && <span className='text-sm text-gray-500'>Loading...</span>}
           </div>
         </div>
 
         <div className='pt-4 border border-t-0'>
-          {filteredAppointments.length > 0 ? filteredAppointments.map((item, index) => (
+          {latestBookings.length > 0 ? latestBookings.map((item, index) => (
             <div className='flex items-center px-6 py-3 gap-3 hover:bg-gray-100' key={index}>
               <img className='rounded-full w-10' src={item.docData.image} alt="" />
               <div className='flex-1 text-sm'>
@@ -130,7 +134,7 @@ const Dashboard = () => {
             </div>
           )) : (
             <div className='px-6 py-8 text-center text-gray-500'>
-              {loading ? 'Loading appointments...' : 'No appointments found for the selected criteria.'}
+              {loading ? 'Loading appointments...' : 'No appointments found for the selected date.'}
             </div>
           )}
         </div>
