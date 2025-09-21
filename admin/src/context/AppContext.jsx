@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-
+import React from 'react';
 export const AppContext = createContext()
 
 const AppContextProvider = (props) => {
